@@ -65,7 +65,7 @@ This project is designed to control a motor using a TB6612FNG motor driver and m
    - If the motor does not reach the current threshold within the specified timeout, the procedure is aborted, and a failure message is sent.
 
 ## File Structure
-
+```
 MotorControlProject/
 ├── include/
 │ └── MotorControl.h # Header file with declarations
@@ -74,7 +74,7 @@ MotorControlProject/
 │ └── MotorControl.cpp # Implementation of motor control logic
 ├── platformio.ini # PlatformIO project configuration file
 └── README.md # This README file
-
+```
 
 ## Configuration
 
