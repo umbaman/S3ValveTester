@@ -66,7 +66,7 @@ This project is designed to control a motor using a TB6612FNG motor driver and m
 
 ## File Structure
 ```
-MotorControlProject/
+Nucleum-Ilium/
 ├── include/
 │ └── MotorControl.h # Header file with declarations
 ├── src/
