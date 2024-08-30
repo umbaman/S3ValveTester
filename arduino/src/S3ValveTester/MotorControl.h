@@ -1,8 +1,6 @@
 #ifndef MOTORCONTROL_H
 #define MOTORCONTROL_H
 
-#include <Arduino.h>
-#include <Wire.h>
 #include <Adafruit_INA219.h>
 #include <STM32Ethernet.h>
 
@@ -21,14 +19,14 @@ void startProcedure();
 void executeMotorProcedure();
 void resetVariables();
 
-// Constants for DFRobot TB6612 motor driver
-const int AIN1 = D3;  // AIN1 pin of DFRobot TB6612
-const int AIN2 = D4;  // AIN2 pin of DFRobot TB6612
-const int PWMA = D5;  // PWMA pin of DFRobot TB6612
-const int BIN1 = D6;  // BIN1 pin of DFRobot TB6612
-const int BIN2 = D7;  // BIN2 pin of DFRobot TB6612
-const int PWMB = D8;  // PWMB pin of DFRobot TB6612
-const int STBY = D9;  // STBY pin of DFRobot TB6612
+// Constants for TB6612FNG motor driver
+const int AIN1 = D3;
+const int AIN2 = D4;
+const int PWMA = D5;
+const int BIN1 = D6;
+const int BIN2 = D7;
+const int PWMB = D8;
+const int STBY = D9;
 
 const int directionDelay = 100; // ms
 const int inertiaDelay = 1000;  // ms

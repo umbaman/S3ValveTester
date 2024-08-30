@@ -29,13 +29,13 @@ byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
 void setupMotorControl() {
     // Initialize motor driver pins
-    pinMode(AIN1, OUTPUT);  // AIN1 for DFRobot TB6612
-    pinMode(AIN2, OUTPUT);  // AIN2 for DFRobot TB6612
-    pinMode(PWMA, OUTPUT);  // PWMA for DFRobot TB6612
-    pinMode(BIN1, OUTPUT);  // BIN1 for DFRobot TB6612
-    pinMode(BIN2, OUTPUT);  // BIN2 for DFRobot TB6612
-    pinMode(PWMB, OUTPUT);  // PWMB for DFRobot TB6612
-    pinMode(STBY, OUTPUT);  // STBY for DFRobot TB6612
+    pinMode(AIN1, OUTPUT);
+    pinMode(AIN2, OUTPUT);
+    pinMode(PWMA, OUTPUT);
+    pinMode(BIN1, OUTPUT);
+    pinMode(BIN2, OUTPUT);
+    pinMode(PWMB, OUTPUT);
+    pinMode(STBY, OUTPUT);
 
     // Set standby to HIGH to enable the motor driver
     digitalWrite(STBY, HIGH);
