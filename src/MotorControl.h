@@ -21,14 +21,11 @@ void startProcedure();
 void executeMotorProcedure();
 void resetVariables();
 
-// Constants for TB6612FNG motor driver
-const int AIN1 = D3;
-const int AIN2 = D4;
-const int PWMA = D5;
-const int BIN1 = D6;
-const int BIN2 = D7;
-const int PWMB = D8;
-const int STBY = D9;
+// Constants for Adafruit TB6612 motor driver
+const int DIR1 = D11;
+const int PWM1 = D10;
+const int PWM2 = D8;
+const int DIR2 = D9;
 
 const int directionDelay = 100; // ms
 const int inertiaDelay = 1000;  // ms

@@ -28,22 +28,12 @@ MotorState motorState = IDLE;
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
 void setupMotorControl() {
-    // Initialize motor driver pins
-    pinMode(AIN1, OUTPUT);
-    pinMode(AIN2, OUTPUT);
-    pinMode(PWMA, OUTPUT);
-    pinMode(BIN1, OUTPUT);
-    pinMode(BIN2, OUTPUT);
-    pinMode(PWMB, OUTPUT);
-    pinMode(STBY, OUTPUT);
+    pinMode(DIR1, OUTPUT);
+    pinMode(PWM1, OUTPUT);
+    pinMode(PWM2, OUTPUT);
+    pinMode(DIR2, OUTPUT);
 
-    // Set standby to HIGH to enable the motor driver
-    digitalWrite(STBY, HIGH);
-
-    // Initialize INA219
     ina219.begin();
-
-    // Start Ethernet server
     Ethernet.begin(mac);
     server.begin();
 }
@@ -53,6 +43,25 @@ void loopMotorControl() {
     if (procedureStarted) {
         executeMotorProcedure();
     }
+}
+
+void driveMotorForward() {
+    digitalWrite(DIR1, HIGH);
+    digitalWrite(DIR2, LOW);
+    analogWrite(PWM1, 255);
+    analogWrite(PWM2, 0);
+}
+
+void driveMotorBackward() {
+    digitalWrite(DIR1, LOW);
+    digitalWrite(DIR2, HIGH);
+    analogWrite(PWM1, 0);
+    analogWrite(PWM2, 255);
+}
+
+void stopMotor() {
+    analogWrite(PWM1, 0);
+    analogWrite(PWM2, 0);
 }
 
 void handleTCPClient() {
@@ -86,60 +95,42 @@ void startProcedure() {
     driveMotorForward();
 }
 
-void resetVariables() {
-    countForward = 0;
-    countReverse1 = 0;
-    countReverse2 = 0;
-    forwardDuration = 0;
-    reverseDuration = 0;
-    finalReverseDuration = 0;
-}
-
 void executeMotorProcedure() {
     float current_mA = ina219.getCurrent_mA();
 
     switch (motorState) {
         case FORWARD:
             if (millis() - stateChangeTime >= directionDelay) {
-                if (countForward < 100) forwardReadings[countForward++] = current_mA;
                 if (current_mA >= 65.0) {
                     driveMotorBackward();
                     motorState = REVERSE;
                     stateChangeTime = millis();
                     forwardDuration = millis() - forwardStartTime;
                     reverseStartTime = millis();
-                } else if (millis() - stateChangeTime >= globalTimeoutDuration) {
-                    motorState = FAILURE;
                 }
             }
             break;
 
         case REVERSE:
             if (millis() - stateChangeTime >= directionDelay + inertiaDelay) {
-                if (countReverse1 < 100) reverse1Readings[countReverse1++] = current_mA;
                 if (current_mA >= globalReverseThreshold) {
                     driveMotorForward();
                     motorState = FINAL_REVERSE;
                     stateChangeTime = millis();
                     reverseDuration = millis() - reverseStartTime;
                     finalReverseStartTime = millis();
-                } else if (millis() - stateChangeTime >= globalTimeoutDuration) {
-                    motorState = FAILURE;
                 }
             }
             break;
 
         case FINAL_REVERSE:
             if (millis() - stateChangeTime >= directionDelay + inertiaDelay) {
-                if (countReverse2 < 100) reverse2Readings[countReverse2++] = current_mA;
                 if (current_mA >= globalReverseThreshold) {
                     stopMotor();
                     motorState = STOPPED;
                     finalReverseDuration = millis() - finalReverseStartTime;
                     sendCompletionMessage(true);
                     procedureStarted = false;
-                } else if (millis() - stateChangeTime >= globalTimeoutDuration) {
-                    motorState = FAILURE;
                 }
             }
             break;
@@ -150,35 +141,9 @@ void executeMotorProcedure() {
             motorState = IDLE;
             break;
 
-        case STOPPED:
-            // Ensure message is only sent once
-            if (motorState != FINAL_REVERSE) {
-                sendCompletionMessage(false);
-                motorState = FINAL_REVERSE;
-            }
-            break;
-
         default:
             break;
     }
-}
-
-void driveMotorForward() {
-    digitalWrite(AIN1, HIGH);
-    digitalWrite(AIN2, LOW);
-    digitalWrite(PWMA, HIGH); // Full speed
-}
-
-void driveMotorBackward() {
-    digitalWrite(AIN1, LOW);
-    digitalWrite(AIN2, HIGH);
-    digitalWrite(PWMA, HIGH); // Full speed
-}
-
-void stopMotor() {
-    digitalWrite(AIN1, LOW);
-    digitalWrite(AIN2, LOW);
-    digitalWrite(PWMA, LOW); // Stop motor
 }
 
 void sendCompletionMessage(bool success) {
