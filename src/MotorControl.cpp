@@ -2,7 +2,7 @@
 
 // Initialize INA219 and Ethernet server
 Adafruit_INA219 ina219;
-EthernetServer server(80);
+EthernetServer server(10000);
 EthernetClient client;
 
 // Global variables
@@ -26,6 +26,7 @@ MotorState motorState = IDLE;
 
 // MAC address for Ethernet
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+IPAddress ip(192, 168, 1, 201);  // Set static IP address
 
 void setupMotorControl() {
     pinMode(DIR1, OUTPUT);
@@ -34,7 +35,10 @@ void setupMotorControl() {
     pinMode(DIR2, OUTPUT);
 
     ina219.begin();
-    Ethernet.begin(mac);
+
+    //Set up Comms
+    Serial.begin(115200);
+    Ethernet.begin(mac, ip);
     server.begin();
 }
 
