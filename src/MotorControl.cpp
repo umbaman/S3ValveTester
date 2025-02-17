@@ -64,6 +64,12 @@ void stopMotor() {
     analogWrite(PWM2, 0);
 }
 
+void readCurrent() {
+    float current_mA = ina219.getCurrent_mA(); // Read current in mA
+    Serial.print("Current (mA): ");
+    Serial.println(current_mA);
+}
+
 void handleTCPClient() {
     client = server.available();
     if (client) {
