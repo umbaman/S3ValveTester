@@ -152,6 +152,13 @@ void executeMotorProcedure() {
     }
 }
 
+void resetVariables(){
+    digitalWrite(DIR1, HIGH);
+    digitalWrite(DIR2, LOW);
+    analogWrite(PWM1, 255);
+    analogWrite(PWM2, 0);
+}
+
 void sendCompletionMessage(bool success) {
     String message = success ? "P," : "F,";
     message += String(calculateRMS(forwardReadings, countForward)) + ",";
