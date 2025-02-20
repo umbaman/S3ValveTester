@@ -23,6 +23,7 @@ int reverseDuration = 0;
 int finalReverseDuration = 0;
 bool procedureStarted = false;
 MotorState motorState = IDLE;
+const char* motorStateStr[] = {"IDLE", "FORWARD", "REVERSE", "FINAL_REVERSE", "FAILURE", "STOPPED"};
 
 // MAC address for Ethernet
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
@@ -37,9 +38,17 @@ void setupMotorControl() {
     ina219.begin();
 
     //Set up Comms
-    Serial.begin(115200);
+    Serial.begin(9600);
     Ethernet.begin(mac, ip);
     server.begin();
+
+    // Print the assigned IP address and port to the serial monitor
+  Serial.println("Ethernet ready");
+  Serial.print("IP Address: ");
+  Serial.println(Ethernet.localIP());
+  Serial.print("Server is listening on port: ");
+
+  return;
 }
 
 void loopMotorControl() {
@@ -47,31 +56,41 @@ void loopMotorControl() {
     if (procedureStarted) {
         executeMotorProcedure();
     }
+    return;
 }
 
 void driveMotorForward() {
+    Serial.println("Drive Motor Forward Procedure");
     digitalWrite(DIR1, HIGH);
-    digitalWrite(DIR2, LOW);
+    //digitalWrite(DIR2, LOW);
     analogWrite(PWM1, 255);
-    analogWrite(PWM2, 0);
+    //analogWrite(PWM2, 0);
+    return;
 }
 
 void driveMotorBackward() {
+    Serial.println("Drive Motor Backward Procedure");
     digitalWrite(DIR1, LOW);
-    digitalWrite(DIR2, HIGH);
-    analogWrite(PWM1, 0);
-    analogWrite(PWM2, 255);
+    //digitalWrite(DIR2, HIGH);
+    analogWrite(PWM1, 255);
+    //analogWrite(PWM2, 255);
+
+    return;
 }
 
 void stopMotor() {
     analogWrite(PWM1, 0);
-    analogWrite(PWM2, 0);
+    //analogWrite(PWM2, 0);
+
+    return;
 }
 
 void readCurrent() {
     float current_mA = ina219.getCurrent_mA(); // Read current in mA
     Serial.print("Current (mA): ");
     Serial.println(current_mA);
+
+    return;
 }
 
 void handleTCPClient() {
@@ -79,24 +98,40 @@ void handleTCPClient() {
     if (client) {
         if (client.connected()) {
             String command = client.readStringUntil('\n');
+            Serial.print("Incoming Command: ");
+            Serial.println(command);
             parseCommand(command);
         }
     }
+
+    return;
 }
 
 void parseCommand(String command) {
+    Serial.print("from parse Function: ");
     if (command.startsWith("S")) {
+
         int commaIndex1 = command.indexOf(',');
+        String cInd1(commaIndex1);
+        Serial.println("First comma Index: " + cInd1);
+
         int commaIndex2 = command.indexOf(',', commaIndex1 + 1);
+        String cInd2(commaIndex2);
+        Serial.println("Second comma Index: " + cInd2);
+
+        globalTimeoutDuration = command.substring(commaIndex1 + 1, commaIndex2).toFloat();
+        Serial.println("Global Timeout Duration: " + command.substring(commaIndex1 + 1, commaIndex2));
         
-        globalTimeoutDuration = command.substring(commaIndex1 + 1, commaIndex2).toInt();
         globalReverseThreshold = command.substring(commaIndex2 + 1).toFloat();
+        Serial.println("Global Reverse Threshold: " + command.substring(commaIndex2 + 1));
         
         startProcedure();
     }
+    return;
 }
 
 void startProcedure() {
+    Serial.println("Procedure is Starting");
     resetVariables();
     procedureStarted = true;
     motorState = FORWARD;
@@ -107,6 +142,10 @@ void startProcedure() {
 
 void executeMotorProcedure() {
     float current_mA = ina219.getCurrent_mA();
+    Serial.print("Execute Motor Procedure: ");
+    Serial.println(motorStateStr[motorState]);
+    String current(current_mA);
+    Serial.println("Motor Current:" + current);
 
     switch (motorState) {
         case FORWARD:
@@ -117,6 +156,8 @@ void executeMotorProcedure() {
                     stateChangeTime = millis();
                     forwardDuration = millis() - forwardStartTime;
                     reverseStartTime = millis();
+                    String fwdDuration(forwardDuration);
+                    Serial.println("Forward Duration:" + fwdDuration);
                 }
             }
             break;
@@ -129,6 +170,8 @@ void executeMotorProcedure() {
                     stateChangeTime = millis();
                     reverseDuration = millis() - reverseStartTime;
                     finalReverseStartTime = millis();
+                    String rvDuration(reverseDuration);
+                    Serial.println("Forward Duration:" + rvDuration);
                 }
             }
             break;
@@ -141,6 +184,8 @@ void executeMotorProcedure() {
                     finalReverseDuration = millis() - finalReverseStartTime;
                     sendCompletionMessage(true);
                     procedureStarted = false;
+                    String frvDuration(finalReverseDuration);
+                    Serial.println("Forward Duration:" + frvDuration);
                 }
             }
             break;
@@ -154,6 +199,8 @@ void executeMotorProcedure() {
         default:
             break;
     }
+
+    return;
 }
 
 void resetVariables(){
@@ -161,6 +208,8 @@ void resetVariables(){
     digitalWrite(DIR2, LOW);
     analogWrite(PWM1, 255);
     analogWrite(PWM2, 0);
+
+    return;
 }
 
 void sendCompletionMessage(bool success) {
@@ -172,6 +221,7 @@ void sendCompletionMessage(bool success) {
     message += String(reverseDuration) + ",";
     message += String(finalReverseDuration);
     client.println(message);
+    return;
 }
 
 float calculateRMS(float readings[], int count) {
