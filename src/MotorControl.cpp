@@ -35,18 +35,21 @@ void setupMotorControl() {
     pinMode(PWM2, OUTPUT);
     pinMode(DIR2, OUTPUT);
 
-    ina219.begin();
+    if (!ina219.begin()) {
+        Serial.println("Couldn't find INA219");
+        while (1);
+    }
+    Serial.println("Ina219 Ready");
 
     //Set up Comms
     Serial.begin(9600);
     Ethernet.begin(mac, ip);
     server.begin();
-
     // Print the assigned IP address and port to the serial monitor
-  Serial.println("Ethernet ready");
-  Serial.print("IP Address: ");
-  Serial.println(Ethernet.localIP());
-  Serial.print("Server is listening on port: ");
+    Serial.println("Ethernet ready");
+    Serial.print("IP Address: ");
+    Serial.println(Ethernet.localIP());
+    Serial.print("Server is listening on port: ");
 
   return;
 }
@@ -204,9 +207,9 @@ void executeMotorProcedure() {
 }
 
 void resetVariables(){
-    digitalWrite(DIR1, HIGH);
+    digitalWrite(DIR1, LOW);
     digitalWrite(DIR2, LOW);
-    analogWrite(PWM1, 255);
+    analogWrite(PWM1, 0);
     analogWrite(PWM2, 0);
 
     return;
