@@ -149,6 +149,7 @@ void executeMotorProcedure() {
     Serial.println(motorStateStr[motorState]);
     String current(current_mA);
     Serial.println("Motor Current:" + current);
+    String StateChangeTime(stateChangeTime);
 
     switch (motorState) {
         case FORWARD:
